@@ -1,10 +1,10 @@
 # Containers and local object storage
 
-Service Dockerfiles live beside each service. `docker-compose.yml` starts the app, MySQL, Redis, the AI API, and MinIO with one command. The project Dockerfiles use small official base images and the frontend installs its locked dependencies with `npm ci`.
+Service Dockerfiles live beside each service. `docker-compose.yml` starts the app, MySQL, Redis, the AI API, and RustFS S3-compatible object storage with one command. The project Dockerfiles use small official base images and the frontend installs its locked dependencies with `npm ci`.
 
 ## Start the stack
 
-From the project root, run `docker compose up --build`. Open the app at <http://localhost:3000>, the MinIO S3 API at <http://localhost:9000>, and the MinIO console at <http://localhost:9001>. Local MinIO credentials default to `minioadmin` / `minioadmin123` and can be overridden with environment variables.
+From the project root, run `docker compose up --build`. Open the app at <http://localhost:3000>, the backend health endpoint at <http://localhost:4000/api/health>, the AI docs at <http://localhost:8000/docs>, the RustFS S3 API at <http://localhost:9000>, and the RustFS console at <http://localhost:9001>. Compose waits for MySQL, Redis, RustFS, and the AI service health checks before starting the backend, then waits for the backend health check before starting the frontend. Local RustFS credentials default to `parking-dev-access` / `parking-dev-secret-please-change`; set `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY` to override them. The backend seeds demo data into MySQL and uses it for parking availability and reservation create/list/cancel requests.
 
 ## Prove S3 upload and read-back
 
@@ -16,7 +16,7 @@ python -m venv .venv
 .\.venv\Scripts\python docker/storage/s3_demo.py
 ```
 
-The script creates the `parking-demo` bucket, uploads `hello-minio.txt`, lists the bucket, downloads and checks the object, then saves the verified copy to `docker/storage/hello-minio-downloaded.txt`. `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_ACCESS_KEY`, and `S3_SECRET_KEY` can be set to use a different S3-compatible service.
+The script creates the `parking-demo` bucket, uploads `hello-s3.txt`, lists the bucket, downloads and checks the object, then saves the verified copy to `docker/storage/hello-s3-downloaded.txt`. It uses the RustFS endpoint at `http://localhost:9000` and the credentials from `.env.example`. `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_ACCESS_KEY`, and `S3_SECRET_KEY` can be set to use a different S3-compatible service.
 
 Production image publishing and ECS configuration are described in `docs/AWS_DEPLOYMENT_GUIDE.md`.
 

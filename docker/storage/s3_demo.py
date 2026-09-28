@@ -1,4 +1,4 @@
-"""Create a MinIO bucket, upload a file, list it, and read it back."""
+"""Create an S3 bucket, upload a file, list it, and read it back."""
 
 import os
 from pathlib import Path
@@ -10,8 +10,8 @@ from botocore.config import Config
 
 endpoint = os.getenv("S3_ENDPOINT_URL", "http://localhost:9000")
 bucket = os.getenv("S3_BUCKET", "parking-demo")
-access_key = os.getenv("S3_ACCESS_KEY", "minioadmin")
-secret_key = os.getenv("S3_SECRET_KEY", "minioadmin123")
+access_key = os.getenv("S3_ACCESS_KEY", "parking-dev-access")
+secret_key = os.getenv("S3_SECRET_KEY", "parking-dev-secret-please-change")
 s3 = boto3.client(
     "s3",
     endpoint_url=endpoint,
@@ -29,7 +29,7 @@ except ClientError as error:
         raise
     s3.create_bucket(Bucket=bucket)
 
-key = "hello-minio.txt"
+key = "hello-s3.txt"
 body = b"Hello from the smart parking local object storage demo.\n"
 s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="text/plain")
 print(f"Objects in {bucket}:")
@@ -39,5 +39,5 @@ for item in s3.list_objects_v2(Bucket=bucket).get("Contents", []):
 download = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
 if download != body:
     raise RuntimeError("Downloaded object did not match uploaded data")
-Path(__file__).with_name("hello-minio-downloaded.txt").write_bytes(download)
-print("Upload and read-back succeeded: docker/storage/hello-minio-downloaded.txt")
+Path(__file__).with_name("hello-s3-downloaded.txt").write_bytes(download)
+print("Upload and read-back succeeded: docker/storage/hello-s3-downloaded.txt")
